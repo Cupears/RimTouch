@@ -19,3 +19,7 @@ Thumbs.db
 .DS_Store
 .vs/
 .vscode/
+
+Build/
+TestResults/
+*.zip

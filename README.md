@@ -1,78 +1,79 @@
-# RimTouch
+<p align="center"><img src="assets/banner.svg" alt="RimTouch 1.7 Beta" width="100%"></p>
+<p align="center">
+  <img src="https://img.shields.io/badge/RimWorld-1.7-29b6f6?style=flat-square" alt="RimWorld 1.7">
+  <img src="https://img.shields.io/badge/Status-beta.1-ffb74d?style=flat-square" alt="Beta 1">
+  <img src="https://img.shields.io/badge/Input-Windows_touch-66bb6a?style=flat-square" alt="Windows touch">
+  <img src="https://img.shields.io/badge/Runtime-.NET_10-9575cd?style=flat-square" alt=".NET 10">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-ec709e?style=flat-square" alt="GPL 3.0"></a>
+</p>
 
-Experimental direct touch input layer for RimWorld 1.6.
+# RimTouch · 1.7 Beta
 
-RimTouch targets Windows touch devices first, especially Microsoft Surface-style tablets and laptops. Linux support is actively being developed; the mod will likely start and work there when Unity reports touch input through legacy `UnityEngine.Input`, but Linux support is still experimental.
+Windows touchscreen controls for RimWorld 1.7, including a remote pointer mode for Remote Desktop and Steam Link.
 
-## Features
+[**Download beta 1**](https://github.com/Cupears/RimTouch/releases/tag/v1.7.0-beta.1) · [Changelog](CHANGELOG.md) · [Bug reports](https://github.com/Cupears/RimTouch/issues/new/choose)
 
-- Touch tap repair for RimWorld UI buttons.
-- Double tap support for UI and map selection.
-- One-finger map pan.
-- Hold-to-select with RimWorld-style drag selection.
-- Long press for right-click/context actions.
-- Two-finger map pan and pinch zoom.
-- World map touch pan and pinch zoom.
-- Two-finger tap to cancel active designator/targeter tools.
-- UI scale list unlock up to `3.0x`.
-- Runtime camera zoom range support, including ranges changed by other camera mods.
+## 🟦 Controls
 
-## Requirements
+| Gesture | Action |
+|---|---|
+| Tap | Select or press a button |
+| Double tap | Group selection or colonist-bar jump |
+| Hold | Right-click menu |
+| Drag | Map pan |
+| Hold, then drag | Selection box |
+| Two fingers | Pan and pinch zoom |
+| Two-finger tap | Cancel an active map tool |
+| Drag inside a scroll view | Menu scrolling |
 
-- RimWorld `1.6`.
-- Harmony.
+## 🟩 Install
 
-## Optional Compatibility
+1. Close RimWorld.
+2. Download and extract `RimTouch-1.7.0-beta.1.zip` into `RimWorld/Mods`.
+3. Enable **Harmony** and **RimTouch 1.7 Beta**.
+4. Disable the original RimTouch; enable only one version.
+5. Open **Options → Mod settings → RimTouch**.
+6. For mouse-only Remote Desktop or Steam Link, enable **Remote pointer mode**.
+7. Check the input status and contact count, then test gestures on a temporary map.
 
-- SimpleCameraSetting (`ray1203.simplecamerasetting`) is not required. RimTouch has its own extended zoom range setting. If you use SimpleCameraSetting anyway, load RimTouch after it and test touch panning carefully because camera-control mods can affect gesture stability.
+Requirements: RimWorld **1.7**, Harmony for **1.7**, Windows **10/11**, and a local or remote touchscreen client.
 
-## Installation
+## 🟨 Beta notes
 
-Copy this folder into RimWorld's `Mods` directory and enable it after Harmony.
-If you use SimpleCameraSetting, load RimTouch after it.
+- Native Windows touch input; no dependency on the unfinished legacy touch API in 1.7.
+- Input capture limited to the game window; physical mouse controls retained.
+- UI mouse events retained for menus, sliders, text fields, and active map tools.
+- Extended zoom disabled by default; previous zoom range restored when disabled.
+- Load after SimpleCameraSetting if installed; test other camera and UI mods separately.
+- Native and remote pointer modes available; select the matching input mode in settings.
+- Linux, macOS, and RimWorld 1.6 excluded from this beta package.
+- Hardware gesture checks pending; device test checklist in [Testing](docs/TESTING.md).
 
-For the current local development setup, the built assembly is:
+## 🟪 Build and checks
 
-`Assemblies/RimTouch.dll`
-
-## Build
-
-The build script defaults to the local GOG RimWorld install path used during development, but it also supports environment overrides:
+.NET 10 SDK required. Set local game paths:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File Source\build.ps1
+$env:RIMWORLD_ROOT = 'D:\SteamLibrary\steamapps\common\RimWorld'
+$env:HARMONY_DLL = 'D:\SteamLibrary\steamapps\workshop\content\294100\2009463077\1.7\Assemblies\0Harmony.dll'
+pwsh -File Source/build.ps1 -Test -Package
 ```
 
-If your paths differ, set:
+Checks: contact lifecycle, quick taps, movement, cancellation, display scaling, Windows data layout, and all **28 Harmony hooks** against RimWorld **1.7.4985**.
 
-- `RIMWORLD_ROOT` to the RimWorld install directory.
-- `HARMONY_DLL` to the full path of `0Harmony.dll`.
+Game and Harmony binaries excluded from the download and repository.
 
-## Status
+## 🟧 Changelog · beta.1
 
-This is an alpha-quality touch mod. Core map, world map, UI tap repair, and zoom gestures are implemented, but touch behavior varies across devices and operating systems. Please test on real hardware before relying on it in a long colony session.
+- Added native Windows touch input and remote pointer mode for 1.7.
+- Added movement deltas, quick-tap buffering, and focus-loss cancellation.
+- Added scroll-view touch hook and input status display.
+- Fixed 1.7 raycast overload and inspect-panel detection.
+- Fixed zoom reset and isolated patch startup failures.
+- Updated build tools, tests, metadata, and beta packaging.
 
-## Reporting touch issues
+## Credits and license
 
-RimTouch depends heavily on your hardware, operating system, Unity/RimWorld input behavior, and active mod list. If something does not work correctly, please open a GitHub issue and include as much detail as possible.
-
-Please include:
-
-* Device model, for example: Surface Pro 8, Steam Deck OLED, Lenovo Yoga, etc.
-* Operating system and version, for example: Windows 11 24H2, Ubuntu 24.04, SteamOS.
-* RimWorld version.
-* RimTouch version or commit.
-* Whether you use Steam, GOG, or another RimWorld build.
-* Full active mod list, especially UI, camera, input, or performance mods.
-* What gesture failed: tap, double tap, one-finger pan, long press, two-finger pan, pinch zoom, world map gesture, UI scale, etc.
-* What you expected to happen.
-* What actually happened.
-* Whether the issue happens with only Harmony and RimTouch enabled.
-* Player.log or HugsLib log, if available.
-
-Short reports like "touch does not work" are hard to fix. A good report makes it much easier to reproduce the problem and improve the mod.
-
-
-## License
-
-GPL-3.0-or-later.
+Original project: [iLtanaka/RimTouch](https://github.com/iLtanaka/RimTouch) · Tatsuki Tanaka.  
+1.7 beta fork: [Cupears/RimTouch](https://github.com/Cupears/RimTouch).  
+[GPL-3.0-or-later](LICENSE).

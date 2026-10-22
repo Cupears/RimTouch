@@ -516,7 +516,7 @@ namespace RimTouch
                 bool hitWorld = Physics.Raycast(ray, out hit, WorldCameraManager.FarClipPlane, WorldCameraManager.WorldLayerMask);
                 if (!hitWorld)
                 {
-                    hitWorld = Physics.Raycast(ray, out hit, WorldCameraManager.FarClipPlane);
+                    hitWorld = Physics.Raycast(ray, out hit, WorldCameraManager.FarClipPlane, ~0);
                 }
                 if (!hitWorld)
                 {

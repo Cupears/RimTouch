@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for testing RimTouch.
+        RimTouch 1.7 beta touch report.
 
         Please fill out this form with as much detail as possible. Touch behavior can depend on your device, OS, RimWorld build, Unity input behavior, and active mod list.
 
@@ -16,14 +16,14 @@ body:
       label: Existing issues
       description: Please check whether this problem has already been reported.
       options:
-        - label: I have searched the existing issues.
+        - label: Existing issues checked.
           required: true
 
   - type: input
     id: device
     attributes:
       label: Device
-      description: What device are you using?
+      description: Device model.
       placeholder: "Example: Surface Pro 8, Surface Laptop Studio, Steam Deck OLED, Lenovo Yoga"
     validations:
       required: true
@@ -33,7 +33,7 @@ body:
     attributes:
       label: Operating system
       description: Include the OS name and version.
-      placeholder: "Example: Windows 11 24H2, Ubuntu 24.04, SteamOS"
+      placeholder: "Example: Windows 11 24H2"
     validations:
       required: true
 
@@ -41,7 +41,7 @@ body:
     id: rimworld-version
     attributes:
       label: RimWorld version
-      placeholder: "Example: 1.6.x"
+      placeholder: "Example: 1.7.4985"
     validations:
       required: true
 
@@ -62,7 +62,7 @@ body:
     attributes:
       label: RimTouch version or commit
       description: Use the release version, commit hash, or date when you downloaded the mod.
-      placeholder: "Example: v0.1.0 or commit 709be64"
+      placeholder: "Example: v1.7.0-beta.1"
     validations:
       required: false
 
@@ -160,3 +160,20 @@ body:
       description: Screenshots, videos, save files, device settings, touchpad/touchscreen notes, or anything else.
     validations:
       required: false
+
+  - type: dropdown
+    id: input-mode
+    attributes:
+      label: Input mode
+      options:
+        - Native touch, local
+        - Native touch, Remote Desktop
+        - Remote pointer, Remote Desktop
+        - Remote pointer, Steam Link
+    validations:
+      required: true
+  - type: input
+    id: input-status
+    attributes:
+      label: Input status and contact count
+      description: Status text from Options - Mod settings - RimTouch.

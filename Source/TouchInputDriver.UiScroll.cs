@@ -25,7 +25,7 @@ namespace RimTouch
                 return false;
             }
 
-            if (Input.touchCount == 0)
+            if (TouchInput.touchCount == 0)
             {
                 if (uiScrollInertiaActive && Time.realtimeSinceStartup - uiScrollInertiaStartTime > 1.25f)
                 {
@@ -35,15 +35,15 @@ namespace RimTouch
                 return ApplyUiScrollInertia(outRect, maxX, maxY, ref scrollPosition);
             }
 
-            if (Input.touchCount != 1 || ignoreTouchesUntilAllReleased)
+            if (TouchInput.touchCount != 1 || ignoreTouchesUntilAllReleased)
             {
                 return false;
             }
 
-            Touch touch;
+            TouchPoint touch;
             try
             {
-                touch = Input.GetTouch(0);
+                touch = TouchInput.GetTouch(0);
             }
             catch
             {

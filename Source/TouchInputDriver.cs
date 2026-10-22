@@ -199,7 +199,7 @@ namespace RimTouch
             get
             {
                 return TouchModeEnabled
-                    && (Input.touchCount >= 2
+                    && (TouchInput.touchCount >= 2
                         || uiScrollGestureActive
                         || Time.frameCount <= suppressUiClickUntilFrame
                         || Time.frameCount - lastMultiTouchFrame <= 30);
@@ -211,7 +211,7 @@ namespace RimTouch
             get
             {
                 return TouchModeEnabled
-                    && (Input.touchCount >= 2
+                    && (TouchInput.touchCount >= 2
                         || uiScrollGestureActive
                         || HasCurrentOneFingerLocalMapTouch()
                         || Time.frameCount <= suppressWindowCloseUntilFrame
@@ -242,10 +242,10 @@ namespace RimTouch
 
             try
             {
-                int count = Math.Min(Input.touchCount, 2);
+                int count = Math.Min(TouchInput.touchCount, 2);
                 for (int i = 0; i < count; i++)
                 {
-                    Vector2 gui = TouchToGui(Input.GetTouch(i).position);
+                    Vector2 gui = TouchToGui(TouchInput.GetTouch(i).position);
                     if (rect.Contains(GuiToLocalGuiPoint(gui)) || rect.Contains(gui))
                     {
                         return true;
@@ -274,7 +274,7 @@ namespace RimTouch
             get
             {
                 return TouchModeEnabled
-                    && Input.touchCount == 0
+                    && TouchInput.touchCount == 0
                     && (Time.frameCount - lastTouchFrame <= 90 || suppressEdgeScrollUntilMouseMoves)
                     && !IsVanillaMapToolActive();
             }
@@ -289,7 +289,7 @@ namespace RimTouch
                     return false;
                 }
 
-                if (Input.touchCount >= 2)
+                if (TouchInput.touchCount >= 2)
                 {
                     return true;
                 }
@@ -304,9 +304,9 @@ namespace RimTouch
                     return true;
                 }
 
-                if (Input.touchCount > 0 && Find.CurrentMap != null && !IsVanillaMapToolActive())
+                if (TouchInput.touchCount > 0 && Find.CurrentMap != null && !IsVanillaMapToolActive())
                 {
-                    Vector2 gui = TouchToGui(Input.GetTouch(0).position);
+                    Vector2 gui = TouchToGui(TouchInput.GetTouch(0).position);
                     if (!IsLikelyUiPosition(gui))
                     {
                         return true;
@@ -338,7 +338,7 @@ namespace RimTouch
                     return false;
                 }
 
-                if (Input.touchCount >= 2)
+                if (TouchInput.touchCount >= 2)
                 {
                     return true;
                 }
@@ -358,14 +358,14 @@ namespace RimTouch
                     return false;
                 }
 
-                if (Input.touchCount >= 2)
+                if (TouchInput.touchCount >= 2)
                 {
                     return true;
                 }
 
-                if (Input.touchCount == 1)
+                if (TouchInput.touchCount == 1)
                 {
-                    Vector2 gui = TouchToGui(Input.GetTouch(0).position);
+                    Vector2 gui = TouchToGui(TouchInput.GetTouch(0).position);
                     return !IsLikelyUiPosition(gui);
                 }
 
@@ -395,7 +395,7 @@ namespace RimTouch
             {
                 return TouchModeEnabled
                     && IsWorldMapActive()
-                    && (Input.touchCount > 0 || Time.frameCount - lastTouchFrame <= 90 || suppressEdgeScrollUntilMouseMoves);
+                    && (TouchInput.touchCount > 0 || Time.frameCount - lastTouchFrame <= 90 || suppressEdgeScrollUntilMouseMoves);
             }
         }
 
@@ -405,7 +405,7 @@ namespace RimTouch
             {
                 return TouchModeEnabled
                     && IsWorldMapActive()
-                    && (Input.touchCount >= 2
+                    && (TouchInput.touchCount >= 2
                         || mode == TouchMode.TwoFinger
                         || Time.frameCount - lastMultiTouchFrame <= 15);
             }
@@ -417,12 +417,18 @@ namespace RimTouch
             {
                 if (!TouchModeEnabled)
                 {
+                    TouchInput.Shutdown();
                     ResetState();
                     TouchTapRepair.Clear();
                     return;
                 }
 
-                int touchCount = Input.touchCount;
+                int touchCount = TouchInput.touchCount;
+                if (TouchInput.FrameCanceled)
+                {
+                    FinishTouch(); StopInertia(); StopUiScrollInertia(); TouchTapRepair.Clear();
+                    return;
+                }
                 if (touchCount <= 0)
                 {
                     if (hadTouchLastFrame)
@@ -498,7 +504,7 @@ namespace RimTouch
                 {
                     lastMultiTouchFrame = Time.frameCount;
                     ignoreTouchesUntilAllReleased = true;
-                    UpdateTwoFinger(Input.GetTouch(0), Input.GetTouch(1));
+                    UpdateTwoFinger(TouchInput.GetTouch(0), TouchInput.GetTouch(1));
                     return;
                 }
 
@@ -508,7 +514,7 @@ namespace RimTouch
                     return;
                 }
 
-                Touch touch = Input.GetTouch(0);
+                TouchPoint touch = TouchInput.GetTouch(0);
                 UpdateOneFinger(touch);
             }
             catch (Exception ex)
@@ -524,7 +530,7 @@ namespace RimTouch
             EnsureRimWorldDragBoxState();
         }
 
-        private static void UpdateOneFinger(Touch touch)
+        private static void UpdateOneFinger(TouchPoint touch)
         {
             Vector2 gui = TouchToGui(touch.position);
 
@@ -678,7 +684,7 @@ namespace RimTouch
             lastGui = gui;
         }
 
-        private static void UpdateOneFingerWorld(Touch touch, Vector2 gui)
+        private static void UpdateOneFingerWorld(TouchPoint touch, Vector2 gui)
         {
             float elapsed = Time.realtimeSinceStartup - startTime;
             float moveDistance = Vector2.Distance(gui, startGui);
@@ -720,7 +726,7 @@ namespace RimTouch
             lastGui = gui;
         }
 
-        private static void UpdateTwoFinger(Touch a, Touch b)
+        private static void UpdateTwoFinger(TouchPoint a, TouchPoint b)
         {
             Vector2 guiA = TouchToGui(a.position);
             Vector2 guiB = TouchToGui(b.position);
@@ -863,6 +869,13 @@ namespace RimTouch
 
         private static void QueueUiTap(Vector2 gui)
         {
+            // Windows supplies real mouse events for UI and active map tools.
+            // Queueing a second repaired click would repeat the same action.
+            if (TouchInput.ForwardsNativeMouse)
+            {
+                TouchTapRepair.Clear(false);
+                return;
+            }
             int clickCount = TouchTapRepair.QueueTap(gui);
             if (clickCount < 2 || !TryJumpToColonistBarTouchDoubleTap(gui))
             {
@@ -1300,7 +1313,7 @@ namespace RimTouch
             return ReflectionGuard.TryGetField(SelectorDragBoxField, selector, out dragBox) ? dragBox : null;
         }
 
-        private static bool IsEnded(Touch touch)
+        private static bool IsEnded(TouchPoint touch)
         {
             return touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled;
         }

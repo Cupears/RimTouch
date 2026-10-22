@@ -5,11 +5,14 @@ namespace RimTouch
 {
     public sealed class RimTouchMod : Mod
     {
-        internal const bool DefaultExtendedZoomEnabled = true;
+        internal const bool DefaultExtendedZoomEnabled = false;
         internal const float DefaultExtendedZoomInMin = 5f;
         internal const float DefaultExtendedZoomOutMax = 120f;
 
         public static RimTouchSettings Settings;
+        private static CameraDriver zoomOwner;
+        private static FloatRange originalZoomRange;
+        private static bool zoomOverrideActive;
 
         public RimTouchMod(ModContentPack content) : base(content)
         {
@@ -21,12 +24,26 @@ namespace RimTouch
             return "RimTouch";
         }
 
+        private Vector2 settingsScroll;
         public override void DoSettingsWindowContents(Rect inRect)
         {
+            Rect view = new Rect(0, 0, inRect.width - 24f, 1150f);
+            Widgets.BeginScrollView(inRect, ref settingsScroll, view);
             Listing_Standard listing = new Listing_Standard();
-            listing.Begin(inRect);
+            listing.Begin(view);
 
+            Color previousColor = GUI.color;
+            GUI.color = new Color(0.25f, 0.8f, 1f);
+            listing.Label("RimTouch 1.7 • Beta 1");
+            GUI.color = previousColor;
+            listing.Label("Input status: " + TouchInput.Status);
+            listing.Label("Active contacts: " + TouchInput.touchCount);
+            listing.Label("Tap: select • Hold: right-click • Drag: pan • Two fingers: pan and pinch zoom");
+            listing.Label("Native mode: direct touch or touch-enabled RDP. Remote pointer mode: mouse-only Remote Desktop or Steam Link.");
             listing.CheckboxLabeled("Enable touch mode", ref Settings.enableTouchMode, "Enables RimTouch direct touch gestures and UI tap repair.");
+            listing.CheckboxLabeled("Remote pointer mode (Remote Desktop / Steam Link)", ref Settings.remotePointerMode,
+                "Treat left-button pointer input as one finger. Physical mouse dragging also becomes touch panning in this mode. Right-click and wheel zoom remain available. Disable when native touch contacts arrive.");
+            listing.Label("Remote pointer mode: one finger only. Separate two-finger pinch requires native touch redirection or pinch-to-wheel in the streaming client.");
             listing.GapLine();
 
             listing.Label("Pan inertia strength: " + Settings.panInertiaStrength.ToString("0.00"));
@@ -77,13 +94,16 @@ namespace RimTouch
             }
 
             listing.End();
-            Settings.Write();
+            Widgets.EndScrollView();
         }
 
         public static void ApplyExtendedZoomRange()
         {
-            if (Settings == null || !Settings.extendedZoomEnabled)
+            if (Settings == null) return;
+            if (!Settings.extendedZoomEnabled)
             {
+                if (zoomOverrideActive && zoomOwner?.config != null) zoomOwner.config.sizeRange = originalZoomRange;
+                zoomOverrideActive = false; zoomOwner = null;
                 return;
             }
 
@@ -93,6 +113,12 @@ namespace RimTouch
                 return;
             }
 
+            if (!zoomOverrideActive || !ReferenceEquals(zoomOwner, cameraDriver))
+            {
+                zoomOwner = cameraDriver;
+                originalZoomRange = cameraDriver.config.sizeRange;
+                zoomOverrideActive = true;
+            }
             float min = Mathf.Clamp(Settings.extendedZoomInMin, 0.5f, 11f);
             float max = Mathf.Max(min + 1f, Settings.extendedZoomOutMax);
             cameraDriver.config.sizeRange.min = min;
@@ -103,6 +129,7 @@ namespace RimTouch
     public sealed class RimTouchSettings : ModSettings
     {
         public bool enableTouchMode = true;
+        public bool remotePointerMode = false;
         public float panInertiaStrength = 1.05f;
         public float panInertiaDamping = 4.8f;
         public float zoomInertiaStrength = 1.05f;
@@ -130,6 +157,7 @@ namespace RimTouch
         public override void ExposeData()
         {
             Scribe_Values.Look(ref enableTouchMode, "enableTouchMode", true);
+            Scribe_Values.Look(ref remotePointerMode, "remotePointerMode", false);
             Scribe_Values.Look(ref panInertiaStrength, "panInertiaStrength", 1.05f);
             Scribe_Values.Look(ref panInertiaDamping, "panInertiaDamping", 4.8f);
             Scribe_Values.Look(ref zoomInertiaStrength, "zoomInertiaStrength", 1.05f);

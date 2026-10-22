@@ -1,3 +1,4 @@
+using System;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
@@ -15,8 +16,18 @@ namespace RimTouch
             TryUnlockUiScales();
 
             Harmony harmony = new Harmony("tatsuki.rimtouch");
-            harmony.PatchAll();
-            Log.Message("[RimTouch] Loaded touch input support.");
+            int applied = 0, failed = 0;
+            foreach (Type type in typeof(RimTouchBootstrap).Assembly.GetTypes())
+            {
+                if (!type.IsDefined(typeof(HarmonyPatch), false)) continue;
+                try { applied += harmony.CreateClassProcessor(type).Patch().Count; }
+                catch (Exception error)
+                {
+                    failed++;
+                    Log.Warning("[RimTouch] Patch skipped: " + type.Name + ": " + error.GetBaseException().Message);
+                }
+            }
+            Log.Message("[RimTouch] 1.7 beta.1 loaded: " + applied + " hooks, " + failed + " skipped classes. Windows native touch backend.");
         }
 
         private static void TryUnlockUiScales()
@@ -48,6 +59,17 @@ namespace RimTouch
             {
                 result = true;
             }
+        }
+    }
+
+    [HarmonyPatch]
+    public static class ScrollViewTouchPatch
+    {
+        public static MethodBase TargetMethod() => AccessTools.Method(typeof(Widgets), "BeginScrollView",
+            new[] { typeof(Rect), typeof(Vector2).MakeByRefType(), typeof(Rect), typeof(bool) });
+        public static void Prefix(Rect outRect, ref Vector2 scrollPosition, Rect viewRect)
+        {
+            TouchInputDriver.ProcessScrollViewTouch(outRect, viewRect, ref scrollPosition);
         }
     }
 
