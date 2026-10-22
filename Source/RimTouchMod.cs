@@ -34,11 +34,11 @@ namespace RimTouch
 
             Color previousColor = GUI.color;
             GUI.color = new Color(0.25f, 0.8f, 1f);
-            listing.Label("RimTouch 1.7 • Beta 1");
+            listing.Label("RimTouch 1.7 â€¢ Beta 1");
             GUI.color = previousColor;
             listing.Label("Input status: " + TouchInput.Status);
             listing.Label("Active contacts: " + TouchInput.touchCount);
-            listing.Label("Tap: select • Hold: right-click • Drag: pan • Two fingers: pan and pinch zoom");
+            listing.Label("Tap: select â€¢ Hold: right-click â€¢ Drag: pan â€¢ Two fingers: pan and pinch zoom");
             listing.Label("Native mode: direct touch or touch-enabled RDP. Remote pointer mode: mouse-only Remote Desktop or Steam Link.");
             listing.CheckboxLabeled("Enable touch mode", ref Settings.enableTouchMode, "Enables RimTouch direct touch gestures and UI tap repair.");
             listing.CheckboxLabeled("Remote pointer mode (Remote Desktop / Steam Link)", ref Settings.remotePointerMode,

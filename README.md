@@ -38,6 +38,18 @@ Windows touchscreen controls for RimWorld 1.7, including a remote pointer mode f
 
 Requirements: RimWorld **1.7**, Harmony for **1.7**, Windows **10/11**, and a local or remote touchscreen client.
 
+## Remote play
+
+| Connection | Input mode | Available input |
+|---|---|---|
+| Direct touchscreen | Native | Separate fingers and pinch |
+| RDP with touch redirection | Native, if contacts arrive | Separate fingers and pinch |
+| Mouse-only RDP or Steam Link | Remote pointer | One-finger gestures; wheel zoom |
+
+Remote pointer mode also changes physical left-mouse dragging into touch panning. Right-click and wheel input remain available. Hold and drag require continuous pointer input from the client. Click-only forwarding cannot provide those gestures.
+
+Separate two-finger gestures require native touch contacts. Client-side pinch-to-wheel may still provide zoom in remote pointer mode.
+
 ## 🟨 Beta notes
 
 - Native Windows touch input; no dependency on the unfinished legacy touch API in 1.7.
@@ -74,6 +86,6 @@ Game and Harmony binaries excluded from the download and repository.
 
 ## Credits and license
 
-Original project: [iLtanaka/RimTouch](https://github.com/iLtanaka/RimTouch) · Tatsuki Tanaka.  
-1.7 beta fork: [Cupears/RimTouch](https://github.com/Cupears/RimTouch).  
-[GPL-3.0-or-later](LICENSE).
+- Original project: [iLtanaka/RimTouch](https://github.com/iLtanaka/RimTouch) · Tatsuki Tanaka.
+- 1.7 beta fork: [Cupears/RimTouch](https://github.com/Cupears/RimTouch).
+- [GPL-3.0-or-later](LICENSE).
