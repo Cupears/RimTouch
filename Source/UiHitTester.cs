@@ -13,7 +13,7 @@ namespace RimTouch
     {
         private static bool IsInspectPaneLikelyVisible()
         {
-            try { return Find.Selector != null && Find.Selector.NumSelected > 0; }
+            try { return Find.UIRoot is UIRoot_Play play && play.mapUI?.selector != null && play.mapUI.selector.NumSelected > 0; }
             catch { return true; }
         }
 

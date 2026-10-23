@@ -34,7 +34,7 @@ namespace RimTouch
 
             Color previousColor = GUI.color;
             GUI.color = new Color(0.25f, 0.8f, 1f);
-            listing.Label("RimTouch 1.7 • Beta 1");
+            listing.Label("RimTouch 1.7 • Beta 2");
             GUI.color = previousColor;
             listing.Label("Input status: " + TouchInput.Status);
             listing.Label("Active contacts: " + TouchInput.touchCount);

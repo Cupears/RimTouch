@@ -918,7 +918,7 @@ namespace RimTouch
         private static void DoMapLeftClick(Vector2 gui)
         {
             Map map = Find.CurrentMap;
-            if (map == null || Find.Selector == null)
+            if (map == null || GetMapSelector(Find.UIRoot) == null)
             {
                 return;
             }
@@ -938,18 +938,18 @@ namespace RimTouch
             object selectable = FindSelectableObjectNearGui(gui, map);
             if (selectable != null)
             {
-                Find.Selector.ClearSelection();
-                Find.Selector.Select(selectable, true, true);
+                GetMapSelector(Find.UIRoot).ClearSelection();
+                GetMapSelector(Find.UIRoot).Select(selectable, true, true);
             }
             else
             {
-                Find.Selector.ClearSelection();
+                GetMapSelector(Find.UIRoot).ClearSelection();
             }
         }
 
         private static bool TryDoMapDoubleClick(Vector2 gui, Map map)
         {
-            if (Find.Selector == null || Find.CameraDriver == null || map == null)
+            if (GetMapSelector(Find.UIRoot) == null || Find.CameraDriver == null || map == null)
             {
                 return false;
             }
@@ -986,10 +986,10 @@ namespace RimTouch
                 return false;
             }
 
-            Find.Selector.ClearSelection();
+            GetMapSelector(Find.UIRoot).ClearSelection();
             for (int i = 0; i < matches.Count; i++)
             {
-                Find.Selector.Select(matches[i], i == 0, true);
+                GetMapSelector(Find.UIRoot).Select(matches[i], i == 0, true);
             }
             return true;
         }
@@ -1089,14 +1089,14 @@ namespace RimTouch
         private static void DoMapRightClick(Vector2 gui)
         {
             Map map = Find.CurrentMap;
-            if (map == null || Find.Selector == null || Find.Selector.SelectedPawns == null || Find.Selector.SelectedPawns.Count == 0)
+            if (map == null || GetMapSelector(Find.UIRoot) == null || GetMapSelector(Find.UIRoot).SelectedPawns == null || GetMapSelector(Find.UIRoot).SelectedPawns.Count == 0)
             {
                 return;
             }
 
             Vector3 clickPosition = GuiToMapPosition(gui);
             FloatMenuContext context;
-            List<FloatMenuOption> options = FloatMenuMakerMap.GetOptions(Find.Selector.SelectedPawns, clickPosition, out context);
+            List<FloatMenuOption> options = FloatMenuMakerMap.GetOptions(GetMapSelector(Find.UIRoot).SelectedPawns, clickPosition, out context);
             if (options != null && options.Count > 0)
             {
                 Find.WindowStack.Add(new FloatMenu(options));
@@ -1112,7 +1112,7 @@ namespace RimTouch
 
             Vector3 clickPosition = GuiToMapPosition(gui);
             FloatMenuContext context;
-            List<FloatMenuOption> options = FloatMenuMakerMap.GetOptions(Find.Selector.SelectedPawns, clickPosition, out context);
+            List<FloatMenuOption> options = FloatMenuMakerMap.GetOptions(GetMapSelector(Find.UIRoot).SelectedPawns, clickPosition, out context);
             if (options == null || options.Count == 0)
             {
                 return false;
@@ -1153,12 +1153,12 @@ namespace RimTouch
 
         private static bool HasSelectedDraftedPawn()
         {
-            if (Find.Selector == null || Find.Selector.SelectedPawns == null)
+            if (GetMapSelector(Find.UIRoot) == null || GetMapSelector(Find.UIRoot).SelectedPawns == null)
             {
                 return false;
             }
 
-            foreach (Pawn pawn in Find.Selector.SelectedPawns)
+            foreach (Pawn pawn in GetMapSelector(Find.UIRoot).SelectedPawns)
             {
                 if (pawn != null && pawn.Drafted)
                 {
@@ -1190,10 +1190,10 @@ namespace RimTouch
                 selectable = FindSelectableObjectNearGui(twoFingerStartMidpoint, Find.CurrentMap);
             }
 
-            Find.Selector.ClearSelection();
+            GetMapSelector(Find.UIRoot).ClearSelection();
             if (selectable != null)
             {
-                Find.Selector.Select(selectable, true, true);
+                GetMapSelector(Find.UIRoot).Select(selectable, true, true);
             }
 
             suppressReleaseTap = true;
@@ -1243,7 +1243,7 @@ namespace RimTouch
 
         private static void FinishRimWorldDragBox()
         {
-            Selector selector = Find.Selector;
+            Selector selector = GetMapSelector(Find.UIRoot);
             DragBox dragBox = GetDragBox();
             if (selector == null || dragBox == null)
             {
@@ -1302,9 +1302,14 @@ namespace RimTouch
             }
         }
 
+        private static Selector GetMapSelector(UIRoot root)
+        {
+            return (root as UIRoot_Play)?.mapUI?.selector;
+        }
+
         private static DragBox GetDragBox()
         {
-            Selector selector = Find.Selector;
+            Selector selector = GetMapSelector(Find.UIRoot);
             if (selector == null || SelectorDragBoxField == null)
             {
                 return null;

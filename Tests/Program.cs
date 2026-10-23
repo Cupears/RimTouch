@@ -62,4 +62,13 @@ pointer.Update(buffer,true,Vector2.zero,false);buffer.NextFrame();Check(buffer.F
 buffer.Clear();pointer.Reset(false);pointer.Update(buffer,false,Vector2.one,true,true,true);buffer.NextFrame();
 bool beginRetained=buffer.Count==1&&buffer[0].phase==TouchPhase.Began;buffer.NextFrame();
 Check(beginRetained&&buffer.Count==1&&buffer[0].phase==TouchPhase.Ended,"remote press and release within one frame retain a complete tap");
+var driver=typeof(RimTouchMod).Assembly.GetType("RimTouch.TouchInputDriver");
+var selectorMethod=AccessTools.Method(driver,"GetMapSelector");
+Check(selectorMethod.Invoke(null,new object[]{null})==null,"selector lookup tolerates missing UI root");
+var entryUi=System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(UIRoot_Entry));
+Check(selectorMethod.Invoke(null,new[]{entryUi})==null,"main menu selector lookup avoids invalid play-root cast");
+var playUi=System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(RimWorld.UIRoot_Play));
+Check(selectorMethod.Invoke(null,new[]{playUi})==null,"selector lookup tolerates map UI not initialized");
+AccessTools.Method(driver,"CancelRimWorldDragBox").Invoke(null,null);
+Check(true,"drag-box cleanup is safe before game UI exists");
 Console.WriteLine($"RESULT: {checks} checks passed; {patched} hooks applied");

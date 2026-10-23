@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.0-beta.2 · 2026-10-23
+
+- Fixed main-menu errors during touch cleanup and window scrolling.
+- Guarded map selection access before the play interface is ready.
+- Added menu and startup regression checks.
+
 ## 1.7.0-beta.1 · 2026-10-22
 
 ### Added
