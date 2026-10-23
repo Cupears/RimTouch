@@ -12,6 +12,11 @@ namespace RimTouch
     public static partial class TouchInputDriver
     {
         private const float DragSlopPixels = 18f;
+        private static float MapDragSlop => RimTouchMod.Settings?.remotePointerMode == true ? 8f : DragSlopPixels;
+        private static bool ShouldPrimeSelection(bool remote, bool shift, float stationary, float distance)
+        {
+            return remote ? shift : stationary >= SelectHoldSeconds && distance <= RightClickHoldSlopPixels;
+        }
         private const float MovementDetectionSlopPixels = 6f;
         private const int TouchDropoutGraceFrames = 2;
         private const float SelectHoldSeconds = 0.32f;
@@ -547,7 +552,7 @@ namespace RimTouch
                 suppressReleaseTap = false;
                 panGestureDistance = 0f;
                 lastSignificantMovementElapsed = 0f;
-                selectPrimed = false;
+                selectPrimed = RimTouchMod.Settings?.remotePointerMode == true && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
                 ClearInertiaSamples();
                 if (!startedOverUi)
                 {
@@ -569,6 +574,7 @@ namespace RimTouch
 
             float elapsed = Time.realtimeSinceStartup - startTime;
             float moveDistance = Vector2.Distance(gui, startGui);
+            if (!startedOverUi && moveDistance > MapDragSlop) suppressReleaseTap = true;
 
             if (mode == TouchMode.VanillaMapTool)
             {
@@ -615,7 +621,7 @@ namespace RimTouch
                 }
 
                 float stationaryDuration = elapsed - lastSignificantMovementElapsed;
-                if (!selectPrimed && stationaryDuration >= SelectHoldSeconds && moveDistance <= RightClickHoldSlopPixels)
+                if (!selectPrimed && ShouldPrimeSelection(RimTouchMod.Settings?.remotePointerMode == true, false, stationaryDuration, moveDistance))
                 {
                     // The finger has genuinely sat still (no meaningful per-frame movement) for
                     // long enough, without having already wandered past the slop. Only now do we
@@ -625,7 +631,7 @@ namespace RimTouch
                     selectPrimed = true;
                 }
 
-                if (moveDistance > DragSlopPixels && !selectPrimed)
+                if (moveDistance > MapDragSlop && !selectPrimed)
                 {
                     mode = TouchMode.MapPan;
                     panAnchorMap = startMap;
@@ -642,7 +648,7 @@ namespace RimTouch
                     suppressReleaseTap = true;
                     CancelRimWorldDragBox();
                 }
-                else if (moveDistance > RightClickHoldSlopPixels && selectPrimed)
+                else if (moveDistance > MapDragSlop && selectPrimed)
                 {
                     mode = TouchMode.SelectionHold;
                     suppressReleaseTap = true;
@@ -665,7 +671,7 @@ namespace RimTouch
 
             if (IsEnded(touch))
             {
-                if (mode == TouchMode.OneFinger && moveDistance <= DragSlopPixels && !rightClickDone)
+                if (mode == TouchMode.OneFinger && moveDistance <= MapDragSlop && !rightClickDone && !suppressReleaseTap)
                 {
                     if (!TryDoDraftedPawnTapCommand(gui))
                     {
@@ -688,10 +694,11 @@ namespace RimTouch
         {
             float elapsed = Time.realtimeSinceStartup - startTime;
             float moveDistance = Vector2.Distance(gui, startGui);
+            if (!startedOverUi && moveDistance > MapDragSlop) suppressReleaseTap = true;
 
             if (mode == TouchMode.OneFinger)
             {
-                if (moveDistance > DragSlopPixels && elapsed < SelectHoldSeconds)
+                if (moveDistance > MapDragSlop)
                 {
                     mode = TouchMode.MapPan;
                     panGestureDistance = moveDistance;
@@ -714,7 +721,7 @@ namespace RimTouch
 
             if (IsEnded(touch))
             {
-                if (mode == TouchMode.OneFinger && moveDistance <= DragSlopPixels && !rightClickDone)
+                if (mode == TouchMode.OneFinger && moveDistance <= MapDragSlop && !rightClickDone && !suppressReleaseTap)
                 {
                     DoWorldLeftClick(gui);
                 }
@@ -822,7 +829,7 @@ namespace RimTouch
                 else
                 {
                     float moveDistance = Vector2.Distance(lastGui, startGui);
-                    if (moveDistance <= DragSlopPixels && !rightClickDone)
+                    if (moveDistance <= MapDragSlop && !rightClickDone && !suppressReleaseTap)
                     {
                         if (IsWorldMapActive())
                         {

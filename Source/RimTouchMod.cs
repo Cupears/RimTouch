@@ -34,7 +34,7 @@ namespace RimTouch
 
             Color previousColor = GUI.color;
             GUI.color = new Color(0.25f, 0.8f, 1f);
-            listing.Label("RimTouch 1.7 • Beta 2");
+            listing.Label("RimTouch 1.7 • Beta 3");
             GUI.color = previousColor;
             listing.Label("Input status: " + TouchInput.Status);
             listing.Label("Active contacts: " + TouchInput.touchCount);
@@ -42,7 +42,7 @@ namespace RimTouch
             listing.Label("Native mode: direct touch or touch-enabled RDP. Remote pointer mode: mouse-only Remote Desktop or Steam Link.");
             listing.CheckboxLabeled("Enable touch mode", ref Settings.enableTouchMode, "Enables RimTouch direct touch gestures and UI tap repair.");
             listing.CheckboxLabeled("Remote pointer mode (Remote Desktop / Steam Link)", ref Settings.remotePointerMode,
-                "Treat left-button pointer input as one finger. Physical mouse dragging also becomes touch panning in this mode. Right-click and wheel zoom remain available. Disable when native touch contacts arrive.");
+                "Treat left-button pointer input as one finger. Physical mouse dragging also becomes touch panning in this mode. Shift + drag selects a group. Plain dragging always pans. Right-click and wheel zoom remain available. Disable when native touch contacts arrive.");
             listing.Label("Remote pointer mode: one finger only. Separate two-finger pinch requires native touch redirection or pinch-to-wheel in the streaming client.");
             listing.GapLine();
 

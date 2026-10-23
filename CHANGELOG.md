@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7.0-beta.3 · 2026-10-23
+
+- Remote pointer: plain dragging pans; Shift + drag selects a group.
+- Removed the hold-to-select timer from remote pointer gestures.
+- Reduced remote map drag threshold to 8 pixels.
+- Prevented completed drags from becoming release taps.
+- Allowed slow world-map drags to pan.
+
 ## 1.7.0-beta.2 · 2026-10-23
 
 - Fixed main-menu errors during touch cleanup and window scrolling.

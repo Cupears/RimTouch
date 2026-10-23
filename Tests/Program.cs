@@ -71,4 +71,9 @@ var playUi=System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject
 Check(selectorMethod.Invoke(null,new[]{playUi})==null,"selector lookup tolerates map UI not initialized");
 AccessTools.Method(driver,"CancelRimWorldDragBox").Invoke(null,null);
 Check(true,"drag-box cleanup is safe before game UI exists");
+var prime=AccessTools.Method(driver,"ShouldPrimeSelection");
+Check(!(bool)prime.Invoke(null,new object[]{true,false,2f,0f}),"remote pause never arms box selection");
+Check((bool)prime.Invoke(null,new object[]{true,true,0f,0f}),"remote Shift explicitly arms box selection");
+Check((bool)prime.Invoke(null,new object[]{false,false,0.4f,0f}),"native touch retains hold-to-select");
+Check(!(bool)prime.Invoke(null,new object[]{false,false,0.1f,0f}),"quick native touch remains a tap or pan");
 Console.WriteLine($"RESULT: {checks} checks passed; {patched} hooks applied");
