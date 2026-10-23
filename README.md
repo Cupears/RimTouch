@@ -1,7 +1,7 @@
 <p align="center"><img src="assets/banner.svg" alt="RimTouch 1.7 Beta" width="100%"></p>
 <p align="center">
   <img src="https://img.shields.io/badge/RimWorld-1.7-29b6f6?style=flat-square" alt="RimWorld 1.7">
-  <img src="https://img.shields.io/badge/Status-beta.4-ffb74d?style=flat-square" alt="Beta 4">
+  <img src="https://img.shields.io/badge/Status-beta.5-ffb74d?style=flat-square" alt="Beta 5">
   <img src="https://img.shields.io/badge/Input-Windows_touch-66bb6a?style=flat-square" alt="Windows touch">
   <img src="https://img.shields.io/badge/Runtime-.NET_10-9575cd?style=flat-square" alt=".NET 10">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-ec709e?style=flat-square" alt="GPL 3.0"></a>
@@ -11,7 +11,7 @@
 
 Windows touchscreen controls for RimWorld 1.7, including a remote pointer mode for Remote Desktop and Steam Link.
 
-[**Download beta 4**](https://github.com/Cupears/RimTouch/releases/tag/v1.7.0-beta.4) · [Changelog](CHANGELOG.md) · [Bug reports](https://github.com/Cupears/RimTouch/issues/new/choose)
+[**Download beta 5**](https://github.com/Cupears/RimTouch/releases/tag/v1.7.0-beta.5) · [Changelog](CHANGELOG.md) · [Bug reports](https://github.com/Cupears/RimTouch/issues/new/choose)
 
 ## 🟦 Controls
 
@@ -31,12 +31,12 @@ Windows touchscreen controls for RimWorld 1.7, including a remote pointer mode f
 | Two-finger tap | Cancel an active map tool |
 | Drag inside a scroll view | Menu scrolling |
 
-All mod controls work without a physical keyboard or mouse. Pan / Select stays visible in play mode. Text fields use the Windows or remote client on-screen keyboard. Remote clients must forward continuous dragging; click-only input cannot pan or box-select.
+All mod controls work without a physical keyboard or mouse. A small Touch button opens the controls. Pan, Select and Action fold the panel after choosing a mode. Hide folds it manually. Adjust button size in mod settings. Text fields use the Windows or remote client on-screen keyboard. Remote clients must forward continuous dragging; click-only input cannot pan or box-select.
 
 ## 🟩 Install
 
 1. Close RimWorld.
-2. Download and extract `RimTouch-1.7.0-beta.4.zip` into `RimWorld/Mods`.
+2. Download and extract `RimTouch-1.7.0-beta.5.zip` into `RimWorld/Mods`.
 3. Enable **Harmony** and **RimTouch 1.7 Beta**.
 4. Disable the original RimTouch; enable only one version.
 5. Open **Options → Mod settings → RimTouch**.
@@ -82,7 +82,7 @@ Checks: contact lifecycle, quick taps, movement, cancellation, display scaling, 
 
 Game and Harmony binaries excluded from the download and repository.
 
-## 🟧 Changelog · beta.4
+## 🟧 Changelog · beta.5
 
 - Added native Windows touch input and remote pointer mode for 1.7.
 - Added movement deltas, quick-tap buffering, and focus-loss cancellation.

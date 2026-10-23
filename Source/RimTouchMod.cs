@@ -27,14 +27,14 @@ namespace RimTouch
         private Vector2 settingsScroll;
         public override void DoSettingsWindowContents(Rect inRect)
         {
-            Rect view = new Rect(0, 0, inRect.width - 24f, 1150f);
+            Rect view = new Rect(0, 0, inRect.width - 24f, 1280f);
             Widgets.BeginScrollView(inRect, ref settingsScroll, view);
             Listing_Standard listing = new Listing_Standard();
             listing.Begin(view);
 
             Color previousColor = GUI.color;
             GUI.color = new Color(0.25f, 0.8f, 1f);
-            listing.Label("RimTouch 1.7 • Beta 4");
+            listing.Label("RimTouch 1.7 • Beta 5");
             GUI.color = previousColor;
             listing.Label("Input status: " + TouchInput.Status);
             listing.Label("Active contacts: " + TouchInput.touchCount);
@@ -44,6 +44,11 @@ namespace RimTouch
             listing.CheckboxLabeled("Remote pointer mode (Remote Desktop / Steam Link)", ref Settings.remotePointerMode,
                 "Treat left-button pointer input as one finger. Physical mouse dragging also becomes touch panning in this mode. Use the on-screen Select button for group selection. Plain dragging pans in Pan mode. Right-click and wheel zoom remain available. Disable when native touch contacts arrive.");
             listing.Label("Remote pointer mode: one finger only. Separate two-finger pinch requires native touch redirection or pinch-to-wheel in the streaming client.");
+            listing.GapLine();
+
+            listing.CheckboxLabeled("Keep touch toolbar collapsed", ref Settings.toolbarCollapsed,"Tap the small Touch button to open all controls. Choosing Pan, Select or Action folds the toolbar again.");
+            listing.Label("Touch button size: " + (Settings.toolbarScale*100f).ToString("0") + "%");
+            Settings.toolbarScale=listing.Slider(Settings.toolbarScale,0.6f,1.25f);
             listing.GapLine();
 
             listing.Label("Pan inertia strength: " + Settings.panInertiaStrength.ToString("0.00"));
@@ -130,6 +135,8 @@ namespace RimTouch
     {
         public bool enableTouchMode = true;
         public bool remotePointerMode = false;
+        public bool toolbarCollapsed = true;
+        public float toolbarScale = 0.8f;
         public float panInertiaStrength = 1.05f;
         public float panInertiaDamping = 4.8f;
         public float zoomInertiaStrength = 1.05f;
@@ -158,6 +165,8 @@ namespace RimTouch
         {
             Scribe_Values.Look(ref enableTouchMode, "enableTouchMode", true);
             Scribe_Values.Look(ref remotePointerMode, "remotePointerMode", false);
+            Scribe_Values.Look(ref toolbarCollapsed,"toolbarCollapsed",true);
+            Scribe_Values.Look(ref toolbarScale,"toolbarScale",0.8f);
             Scribe_Values.Look(ref panInertiaStrength, "panInertiaStrength", 1.05f);
             Scribe_Values.Look(ref panInertiaDamping, "panInertiaDamping", 4.8f);
             Scribe_Values.Look(ref zoomInertiaStrength, "zoomInertiaStrength", 1.05f);

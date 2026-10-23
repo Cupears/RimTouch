@@ -27,7 +27,7 @@ namespace RimTouch
                     Log.Warning("[RimTouch] Patch skipped: " + type.Name + ": " + error.GetBaseException().Message);
                 }
             }
-            Log.Message("[RimTouch] 1.7 beta.4 loaded: " + applied + " hooks, " + failed + " skipped classes. Windows native touch backend.");
+            Log.Message("[RimTouch] 1.7 beta.5 loaded: " + applied + " hooks, " + failed + " skipped classes. Windows native touch backend.");
         }
 
         private static void TryUnlockUiScales()

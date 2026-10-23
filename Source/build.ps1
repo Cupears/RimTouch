@@ -29,15 +29,15 @@ if ($Test) {
 Copy-Item (Join-Path $root 'Build/RimTouch.dll') (Join-Path $root 'Assemblies/RimTouch.dll') -Force
 if ($Package) {
     $publish = Join-Path $root 'Publish'
-    $folder = Join-Path $publish ('RimTouch-1.7.0-beta.4-' + [DateTime]::Now.ToString('yyyyMMdd-HHmmss-fff'))
+    $folder = Join-Path $publish ('RimTouch-1.7.0-beta.5-' + [DateTime]::Now.ToString('yyyyMMdd-HHmmss-fff'))
     $mod = Join-Path $folder 'RimTouch-1.7-Beta'
     New-Item -ItemType Directory -Force -Path $mod | Out-Null
     foreach ($entry in @('About','Assemblies','assets','docs','README.md','CHANGELOG.md','LICENSE')) {
         Copy-Item (Join-Path $root $entry) $mod -Recurse
     }
-    $zip = Join-Path $publish 'RimTouch-1.7.0-beta.4.zip'
+    $zip = Join-Path $publish 'RimTouch-1.7.0-beta.5.zip'
     Compress-Archive -LiteralPath $mod -DestinationPath $zip -Force
-    (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower() + '  RimTouch-1.7.0-beta.4.zip' |
+    (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower() + '  RimTouch-1.7.0-beta.5.zip' |
         Set-Content (Join-Path $publish 'SHA256SUMS.txt')
     Write-Output "Package: $zip"
 }

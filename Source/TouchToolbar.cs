@@ -36,14 +36,20 @@ namespace RimTouch
         private static bool touchActionMode;
         private static bool HasToolbarTouch => toolbarContact.Captured || (TouchInput.touchCount==1 && IsTouchToolbarPosition(TouchToGui(TouchInput.GetTouch(0).position)));
         private static bool ToolbarVisible => TouchModeEnabled && Find.UIRoot is UIRoot_Play;
-        private static Rect[] ToolbarRects()
+        private static bool ToolbarCollapsed => RimTouchMod.Settings?.toolbarCollapsed ?? true;
+        private static Rect[] BuildToolbarRects(float screenWidth, float screenHeight, float scale, bool collapsed)
         {
-            float width = Mathf.Min(216f, UI.screenWidth-16f);
-            float x = Mathf.Max(8f, UI.screenWidth-width-180f);
-            Rect[] rects = new Rect[10];
-            for(int i=0;i<rects.Length;i++) rects[i]=new Rect(x+(i%2)*(width/2),100f+(i/2)*52f,width/2-4f,48f);
+            scale=Mathf.Clamp(scale,0.6f,1.25f);
+            float cellWidth=64f*scale, cellHeight=36f*scale, gap=3f;
+            int columns=collapsed?1:3, count=collapsed?1:11;
+            float width=columns*(cellWidth+gap)-gap;
+            float x=Mathf.Max(8f,screenWidth-width-180f);
+            float y=Mathf.Max(8f,Mathf.Min(100f,screenHeight-((count+columns-1)/columns)*(cellHeight+gap)-8f));
+            Rect[] rects=new Rect[count];
+            for(int i=0;i<count;i++) rects[i]=new Rect(x+(i%columns)*(cellWidth+gap),y+(i/columns)*(cellHeight+gap),cellWidth,cellHeight);
             return rects;
         }
+        private static Rect[] ToolbarRects() => BuildToolbarRects(UI.screenWidth,UI.screenHeight,RimTouchMod.Settings?.toolbarScale??0.8f,ToolbarCollapsed);
         private static bool IsTouchToolbarPosition(Vector2 gui)
         {
             if (!ToolbarVisible) return false;
@@ -55,7 +61,9 @@ namespace RimTouch
             if(!ToolbarVisible) { toolbarContact.Cancel(); return false; }
             bool captured=toolbarContact.Captured;
             point=new TouchPoint(point.fingerId,TouchToGui(point.position),point.deltaPosition,point.phase);
+            bool collapsed=ToolbarCollapsed;
             int action=toolbarContact.Process(point,ToolbarRects());
+            if (action>=0 && collapsed) action=10;
             if(!captured && !toolbarContact.Captured && action<0) return false;
             StopInertia(); StopUiScrollInertia();
             CancelRimWorldDragBox();
@@ -68,9 +76,10 @@ namespace RimTouch
         {
             switch(action)
             {
-                case 0: touchSelectMode=false; touchActionMode=false; break;
-                case 1: touchSelectMode=true; touchActionMode=false; break;
-                case 2: touchActionMode=!touchActionMode; touchSelectMode=false; break;
+                case 10: if(RimTouchMod.Settings!=null) RimTouchMod.Settings.toolbarCollapsed=!ToolbarCollapsed; break;
+                case 0: touchSelectMode=false; touchActionMode=false; CollapseToolbar(); break;
+                case 1: touchSelectMode=true; touchActionMode=false; CollapseToolbar(); break;
+                case 2: touchActionMode=!touchActionMode; touchSelectMode=false; CollapseToolbar(); break;
                 case 3:
                     touchActionMode=false; touchSelectMode=false;
                     if(Find.CurrentMap!=null) CancelVanillaMapTool();
@@ -88,6 +97,7 @@ namespace RimTouch
                 case 9: Find.WindowStack?.Add(new Dialog_MessageBox("Touch controls\n\nPan: drag the map.\nSelect: drag a selection box; tap Pan to return.\nAction: tap once, then tap a pawn or location to open orders.\nHold a map location: open orders.\nZoom + / -: zoom without pinch or a wheel.\nCancel: cancel a tool or close the current dialog.\nAccept: confirm the current dialog.\nPause / Speed: control game time.\n\nBuild, draft, inventory and work controls use the normal game buttons. Text fields use the touchscreen client's on-screen keyboard.\n\nRemote play requires continuous pointer dragging, not click-only input.","Close")); break;
             }
         }
+        private static void CollapseToolbar() { if(RimTouchMod.Settings!=null) RimTouchMod.Settings.toolbarCollapsed=true; }
         private static void ToolbarZoom(bool zoomIn)
         {
             StopInertia();
@@ -100,16 +110,19 @@ namespace RimTouch
         {
             if(!ToolbarVisible) return;
             string speed=Find.TickManager?.CurTimeSpeed.ToString()??"Normal";
-            string[] labels={"Pan","Select","Action","Cancel","Zoom +","Zoom -","Pause",speed,"Accept","Help"};
-            string[] tips={"Drag to move the map.","Drag a box to select pawns. Tap Pan when finished.","Tap Action, then tap a location to open orders. No right mouse button needed.","Cancel the active tool or close a dialog.","Zoom in.","Zoom out.","Pause or resume.","Cycle normal, fast and fastest speed.","Confirm the current dialog.","Show touchscreen control help."};
+            string[] labels={"Pan","Select","Action","Cancel","Zoom +","Zoom -","Pause",speed,"Accept","Help","Hide"};
+            string[] tips={"Drag to move the map.","Drag a box to select pawns. Tap Pan when finished.","Tap Action, then tap a location to open orders. No right mouse button needed.","Cancel the active tool or close a dialog.","Zoom in.","Zoom out.","Pause or resume.","Cycle normal, fast and fastest speed.","Confirm the current dialog.","Show touchscreen control help.","Collapse to one small button."};
             Rect[] rects=ToolbarRects();
             for(int i=0;i<rects.Length;i++)
             {
-                bool active=i==0&&!touchSelectMode&&!touchActionMode || i==1&&touchSelectMode || i==2&&touchActionMode;
+                int button=ToolbarCollapsed?10:i;
+                bool active=ToolbarCollapsed || button==0&&!touchSelectMode&&!touchActionMode || button==1&&touchSelectMode || button==2&&touchActionMode;
                 Widgets.DrawBoxSolid(rects[i],active?new Color(0.12f,0.42f,0.53f,0.96f):new Color(0.10f,0.12f,0.16f,0.96f));
                 Widgets.DrawBox(rects[i]);
-                var anchor=Text.Anchor; Text.Anchor=TextAnchor.MiddleCenter; Widgets.Label(rects[i],labels[i]); Text.Anchor=anchor;
-                TooltipHandler.TipRegion(rects[i],tips[i]);
+                var anchor=Text.Anchor; var font=Text.Font; Text.Font=GameFont.Tiny; Text.Anchor=TextAnchor.MiddleCenter;
+                string label=ToolbarCollapsed?(touchSelectMode?"Select":touchActionMode?"Action":"Touch"):labels[button];
+                Widgets.Label(rects[i],label); Text.Anchor=anchor; Text.Font=font;
+                TooltipHandler.TipRegion(rects[i],ToolbarCollapsed?"Open touch controls. Current drag mode: "+(touchSelectMode?"Select":"Pan"):tips[button]);
             }
             Event e=Event.current;
             if(e!=null && e.isMouse && IsTouchToolbarPosition(e.mousePosition)) e.Use();

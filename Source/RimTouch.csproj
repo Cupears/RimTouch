@@ -4,7 +4,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AssemblyName>RimTouch</AssemblyName>
-    <Version>1.7.0-beta.4</Version>
+    <Version>1.7.0-beta.5</Version>
     <RimWorldRoot Condition="'$(RimWorldRoot)'==''">$(RIMWORLD_ROOT)</RimWorldRoot>
     <HarmonyPath Condition="'$(HarmonyPath)'==''">$(HARMONY_DLL)</HarmonyPath>
     <OutputPath>../Build/</OutputPath>

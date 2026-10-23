@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.7.0-beta.5 · 2026-10-23
+
+- Collapsed the toolbar to one small Touch button by default.
+- Added a smaller three-column layout, Hide button and adjustable button size.
+- Folded controls after choosing Pan, Select or Action.
+- Displayed the active Select or Action mode on the collapsed button.
+
 ## 1.7.0-beta.4 · 2026-10-23
 
 - Added a touchscreen toolbar: Pan, Select, Action, Cancel, zoom, pause, speed, Accept and Help.
