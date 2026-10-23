@@ -45,3 +45,18 @@ For mouse-only RDP or Steam Link, enable Remote pointer mode; check one-finger c
 - Gesture, expected result, actual result, and steps.
 - Active camera/UI mods.
 - Player.log with personal paths removed if needed.
+
+
+## Touch-only toolbar checks (beta 4)
+- Start a map with Remote pointer mode enabled. No keyboard connected.
+- Pan: tap Pan, drag slowly, pause, keep dragging, then release. No selection box or release selection.
+- Select: tap Select, drag around pawns, release, then tap Pan.
+- Action: select a pawn, tap Action, then tap a target. Choose an order by touch.
+- World map: select a caravan, tap Action, then tap a destination.
+- Zoom: tap Zoom + and Zoom - on both map and world map, without wheel or pinch.
+- Cancel a build tool and close a dialog using Cancel. Confirm a dialog with Accept.
+- Pause and cycle speeds with the toolbar. Open and close Help.
+- Press a toolbar button, slide off and release: no action and no map interaction.
+- Press a toolbar button, lose focus, return: no stuck contact or action.
+- Open a text field and use the Windows or streaming client on-screen keyboard.
+- Test both native touch and single-pointer Steam Link / RDP. Physical device results must be recorded separately from automated checks.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.7.0-beta.4 · 2026-10-23
+
+- Added a touchscreen toolbar: Pan, Select, Action, Cancel, zoom, pause, speed, Accept and Help.
+- Removed the Shift requirement and timed hold-to-select gesture.
+- Added single-contact toolbar capture, canceled-drag checks and map input protection.
+- Added on-screen control help and remote text-entry notes.
+
 ## 1.7.0-beta.3 · 2026-10-23
 
 - Remote pointer: plain dragging pans; Shift + drag selects a group.

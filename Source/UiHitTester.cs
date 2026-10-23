@@ -25,6 +25,7 @@ namespace RimTouch
 
         private static bool IsLikelyUiPosition(Vector2 gui)
         {
+            if (IsTouchToolbarPosition(gui)) return true;
             WindowStack stack = Find.WindowStack;
             if (stack != null && stack.GetWindowAt(gui) != null)
             {
@@ -60,6 +61,7 @@ namespace RimTouch
 
         private static bool IsVanillaMapToolActive()
         {
+            if (Find.UIRoot is not UIRoot_Play play || play.mapUI == null) return false;
             if (Find.DesignatorManager != null && Find.DesignatorManager.SelectedDesignator != null)
             {
                 return true;

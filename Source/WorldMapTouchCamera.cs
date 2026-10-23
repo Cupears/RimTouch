@@ -467,6 +467,23 @@ namespace RimTouch
             ReflectionGuard.TrySetField(WorldCameraMouseBottomEdgeStartField, driver, 0f);
         }
 
+        private static void DoWorldRightClick(Vector2 gui)
+        {
+            if (!TryGetWorldTileAtGui(gui,out PlanetTile tile)) return;
+            WorldSelector selector=Find.WorldSelector;
+            if(selector?.SelectedObjects==null) return;
+            foreach(WorldObject obj in selector.SelectedObjects)
+            {
+                if(obj is Caravan caravan && caravan.IsPlayerControlled)
+                {
+                    var choices=FloatMenuMakerWorld.ChoicesAtFor(tile,caravan);
+                    if(choices.Count>0) Find.WindowStack.Add(new FloatMenu(choices));
+                    else ReflectionGuard.TryInvoke(HarmonyLib.AccessTools.Method(typeof(WorldSelector),"AutoOrderToTile"),selector,new object[]{caravan,tile});
+                    return;
+                }
+            }
+        }
+
         private static void DoWorldLeftClick(Vector2 gui)
         {
             WorldSelector selector = Find.WorldSelector;

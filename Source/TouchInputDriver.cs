@@ -13,13 +13,7 @@ namespace RimTouch
     {
         private const float DragSlopPixels = 18f;
         private static float MapDragSlop => RimTouchMod.Settings?.remotePointerMode == true ? 8f : DragSlopPixels;
-        private static bool ShouldPrimeSelection(bool remote, bool shift, float stationary, float distance)
-        {
-            return remote ? shift : stationary >= SelectHoldSeconds && distance <= RightClickHoldSlopPixels;
-        }
-        private const float MovementDetectionSlopPixels = 6f;
         private const int TouchDropoutGraceFrames = 2;
-        private const float SelectHoldSeconds = 0.32f;
         private const float RightClickHoldSeconds = 0.50f;
         private const float RightClickHoldSlopPixels = 22f;
         private const float TouchMapTargetRadiusPixels = 28f;
@@ -151,7 +145,6 @@ namespace RimTouch
         private static float lastWorldPanSampleTime;
         private static float lastZoomSampleTime;
         private static float panGestureDistance;
-        private static float lastSignificantMovementElapsed;
         private static bool selectPrimed;
         private static readonly Vector3[] PanVelocitySamples = new Vector3[PanVelocitySampleCapacity];
         private static readonly float[] PanVelocitySampleTimes = new float[PanVelocitySampleCapacity];
@@ -204,7 +197,7 @@ namespace RimTouch
             get
             {
                 return TouchModeEnabled
-                    && (TouchInput.touchCount >= 2
+                    && (HasToolbarTouch || TouchInput.touchCount >= 2
                         || uiScrollGestureActive
                         || Time.frameCount <= suppressUiClickUntilFrame
                         || Time.frameCount - lastMultiTouchFrame <= 30);
@@ -216,7 +209,7 @@ namespace RimTouch
             get
             {
                 return TouchModeEnabled
-                    && (TouchInput.touchCount >= 2
+                    && (HasToolbarTouch || TouchInput.touchCount >= 2
                         || uiScrollGestureActive
                         || HasCurrentOneFingerLocalMapTouch()
                         || Time.frameCount <= suppressWindowCloseUntilFrame
@@ -294,6 +287,8 @@ namespace RimTouch
                     return false;
                 }
 
+                if (HasToolbarTouch) return true;
+
                 if (TouchInput.touchCount >= 2)
                 {
                     return true;
@@ -338,6 +333,7 @@ namespace RimTouch
         {
             get
             {
+                if (HasToolbarTouch) return true;
                 if (!TouchModeEnabled || Find.CurrentMap == null)
                 {
                     return false;
@@ -363,6 +359,7 @@ namespace RimTouch
                     return false;
                 }
 
+                if (HasToolbarTouch) return true;
                 if (TouchInput.touchCount >= 2)
                 {
                     return true;
@@ -410,7 +407,7 @@ namespace RimTouch
             {
                 return TouchModeEnabled
                     && IsWorldMapActive()
-                    && (TouchInput.touchCount >= 2
+                    && (HasToolbarTouch || TouchInput.touchCount >= 2
                         || mode == TouchMode.TwoFinger
                         || Time.frameCount - lastMultiTouchFrame <= 15);
             }
@@ -431,6 +428,7 @@ namespace RimTouch
                 int touchCount = TouchInput.touchCount;
                 if (TouchInput.FrameCanceled)
                 {
+                    toolbarContact.Cancel();
                     FinishTouch(); StopInertia(); StopUiScrollInertia(); TouchTapRepair.Clear();
                     return;
                 }
@@ -507,6 +505,7 @@ namespace RimTouch
 
                 if (touchCount >= 2)
                 {
+                    toolbarContact.Cancel();
                     lastMultiTouchFrame = Time.frameCount;
                     ignoreTouchesUntilAllReleased = true;
                     UpdateTwoFinger(TouchInput.GetTouch(0), TouchInput.GetTouch(1));
@@ -520,6 +519,7 @@ namespace RimTouch
                 }
 
                 TouchPoint touch = TouchInput.GetTouch(0);
+                if (ProcessTouchToolbar(touch)) return;
                 UpdateOneFinger(touch);
             }
             catch (Exception ex)
@@ -533,6 +533,7 @@ namespace RimTouch
         public static void OnGUI()
         {
             EnsureRimWorldDragBoxState();
+            DrawTouchToolbar();
         }
 
         private static void UpdateOneFinger(TouchPoint touch)
@@ -551,8 +552,7 @@ namespace RimTouch
                 rightClickDone = false;
                 suppressReleaseTap = false;
                 panGestureDistance = 0f;
-                lastSignificantMovementElapsed = 0f;
-                selectPrimed = RimTouchMod.Settings?.remotePointerMode == true && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+                selectPrimed = touchSelectMode;
                 ClearInertiaSamples();
                 if (!startedOverUi)
                 {
@@ -611,26 +611,6 @@ namespace RimTouch
                 SuppressVanillaMapInputFallout();
                 CancelRimWorldDragBox();
 
-                float frameDelta = Vector2.Distance(gui, lastGui);
-                if (frameDelta > MovementDetectionSlopPixels)
-                {
-                    // The finger is actively, continuously moving right now - keep pushing back
-                    // the "last significant movement" timestamp so a slow but steady drag never
-                    // accumulates enough stationary time to be mistaken for a long-press-hold.
-                    lastSignificantMovementElapsed = elapsed;
-                }
-
-                float stationaryDuration = elapsed - lastSignificantMovementElapsed;
-                if (!selectPrimed && ShouldPrimeSelection(RimTouchMod.Settings?.remotePointerMode == true, false, stationaryDuration, moveDistance))
-                {
-                    // The finger has genuinely sat still (no meaningful per-frame movement) for
-                    // long enough, without having already wandered past the slop. Only now do we
-                    // treat a subsequent drag as an intentional "hold-then-select" gesture instead
-                    // of a pan - matching "hold WITHOUT movement -> SelectionHold" literally,
-                    // regardless of how fast or slow the eventual drag itself turns out to be.
-                    selectPrimed = true;
-                }
-
                 if (moveDistance > MapDragSlop && !selectPrimed)
                 {
                     mode = TouchMode.MapPan;
@@ -641,7 +621,7 @@ namespace RimTouch
                     SuppressUiClickFallout();
                     CancelRimWorldDragBox();
                 }
-                else if (elapsed >= RightClickHoldSeconds && moveDistance <= RightClickHoldSlopPixels && !rightClickDone)
+                else if (!selectPrimed && !touchActionMode && elapsed >= RightClickHoldSeconds && moveDistance <= RightClickHoldSlopPixels && !rightClickDone)
                 {
                     DoMapRightClick(gui);
                     rightClickDone = true;
@@ -673,7 +653,8 @@ namespace RimTouch
             {
                 if (mode == TouchMode.OneFinger && moveDistance <= MapDragSlop && !rightClickDone && !suppressReleaseTap)
                 {
-                    if (!TryDoDraftedPawnTapCommand(gui))
+                    if (touchActionMode) { touchActionMode=false; DoMapRightClick(gui); }
+                    else if (!TryDoDraftedPawnTapCommand(gui))
                     {
                         DoMapLeftClick(gui);
                     }
@@ -723,7 +704,8 @@ namespace RimTouch
             {
                 if (mode == TouchMode.OneFinger && moveDistance <= MapDragSlop && !rightClickDone && !suppressReleaseTap)
                 {
-                    DoWorldLeftClick(gui);
+                    if(touchActionMode) { touchActionMode=false; DoWorldRightClick(gui); }
+                    else DoWorldLeftClick(gui);
                 }
                 FinalizeInertiaFromGesture();
                 FinishTouch();
@@ -1353,7 +1335,6 @@ namespace RimTouch
             worldPanAnchorValid = false;
             worldPanAnchorPoint = Vector3.zero;
             panGestureDistance = 0f;
-            lastSignificantMovementElapsed = 0f;
             selectPrimed = false;
             lastTwoFingerDistance = 0f;
             lastTwoFingerMidpoint = Vector2.zero;

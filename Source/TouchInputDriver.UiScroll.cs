@@ -13,7 +13,7 @@ namespace RimTouch
     {
         public static bool ProcessScrollViewTouch(Rect outRect, Rect viewRect, ref Vector2 scrollPosition)
         {
-            if (!TouchModeEnabled)
+            if (HasToolbarTouch || !TouchModeEnabled)
             {
                 return false;
             }

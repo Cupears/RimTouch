@@ -5,11 +5,11 @@
   <url>https://github.com/Cupears/RimTouch</url>
   <packageId>cupears.rimtouch17</packageId>
   <supportedVersions><li>1.7</li></supportedVersions>
-  <modVersion>1.7.0-beta.3</modVersion>
+  <modVersion>1.7.0-beta.4</modVersion>
   <modDependencies><li><packageId>brrainz.harmony</packageId><displayName>Harmony</displayName><steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl></li></modDependencies>
   <loadAfter><li>brrainz.harmony</li><li>ray1203.simplecamerasetting</li></loadAfter>
   <incompatibleWith><li>tatsuki.rimtouch</li></incompatibleWith>
-  <description>Windows touchscreen controls for RimWorld 1.7. Beta 3.
+  <description>Windows touchscreen controls for RimWorld 1.7. Beta 4.
 
 Tap, double tap, long-press menus, map pan, selection boxes, pinch zoom, world map gestures, and menu scrolling.
 
